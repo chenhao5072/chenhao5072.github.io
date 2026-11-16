@@ -9,7 +9,7 @@ const [checkout, ...rest] = process.argv.slice(2);
 if (!checkout || rest.length) throw new Error("Usage: node scripts/sync-github-pages.mjs <main-checkout>");
 const destination = realpathSync(checkout);
 const git = (...args) => execFileSync("git", ["-C", destination, ...args], { encoding: "utf8" }).trim();
-const isPagesFile = /^(?:\.nojekyll|(?:404|index)\.html|robots\.txt|sitemap\.xml|site\.webmanifest|assets\/[\w.-]+|(?:(?:en|ja)\/)?(?:about|careers|culture|projects|work)\/index\.html|(?:en|ja)\/(?:index|404)\.html)$/;
+const isPagesFile = /^(?:\.nojekyll|(?:404|index)\.html|release\.json|robots\.txt|sitemap\.xml|site\.webmanifest|assets\/[\w.-]+|(?:(?:en|ja)\/)?(?:about|careers|culture|projects|work)\/index\.html|(?:en|ja)\/(?:index|404)\.html)$/;
 const cloudflareFiles = new Set(["_headers", "_redirects"]);
 const remote = git("remote", "get-url", "origin");
 

@@ -5,7 +5,7 @@
 | 去哪里 | 用来做什么 |
 | --- | --- |
 | `website-source` | 编辑内容和样式、构建、查看交接说明 |
-| `main` | 仅保存供 [GitHub Pages 备用站](https://chenhao5072.github.io/) 发布的静态网页 |
+| `main` | 保存 [GitHub Pages 备用站](https://chenhao5072.github.io/) 的静态发布快照 |
 | [Cloudflare Pages 正式站](https://onepiecestudio.pages.dev/) | 对外使用的官网，独立上传部署 |
 
 ## 换电脑后从这里开始
@@ -31,4 +31,4 @@ npm run serve
 
 维护时，先拉取 `website-source` 的最新版本；修改后重新构建、校验并预览，再将源码提交到该分支。提交源码不会自动发布任何站点。
 
-上线、回滚和权限交接见 [维护与交接手册](OPERATIONS.md)。本仓库公开可见，请只提交可公开的源码和网站素材。
+自动发布的启用、验收、回滚和权限交接见 [维护与交接手册](OPERATIONS.md)。本仓库公开可见，请只提交可公开的源码和网站素材。

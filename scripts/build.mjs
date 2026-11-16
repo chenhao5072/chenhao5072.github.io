@@ -10,7 +10,8 @@ const distDir = path.join(projectRoot, "dist");
 const siteUrl = (process.env.SITE_URL || "https://onepiecestudio.pages.dev").replace(/\/$/, "");
 const githubPages = process.argv.includes("--github-pages");
 const googleSiteVerification = "25ojcGxu8hY4rNnu2vGKqlsNws_mCySeZ-2dM_-z3O0";
-const buildDate = new Date().toISOString().slice(0, 10);
+const buildDate = new Date(process.env.SOURCE_DATE_EPOCH === undefined
+  ? Date.now() : Number(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString().slice(0, 10);
 const assetVersion = createHash("sha256")
   .update(readFileSync(path.join(srcDir, "styles.css")))
   .update(readFileSync(path.join(srcDir, "core-pages.css")))

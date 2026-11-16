@@ -2,7 +2,7 @@
 
 ## 交接要点
 
-GitHub 同一仓库的 `website-source` 保存源码，`main` 发布静态备用站；Cloudflare 的 `onepiecestudio` 项目独立维护正式站。两个发布入口不会自动同步。在新电脑克隆源码后先本地验收，接手确认不需要为此重新发布正式站。
+GitHub 同一仓库的 `website-source` 保存源码，`main` 保存备用站发布快照，Cloudflare 的 `onepiecestudio` 项目继续托管正式站。启用自动发布后，从 `website-source` 提交更新，不需要分别上传两个网站。在新电脑克隆源码后先本地验收，接手确认不需要为此重新发布正式站。
 
 由现任管理员邀请接手人使用自己的账号，按以下职责授予权限：
 
@@ -15,15 +15,25 @@ GitHub 同一仓库的 `website-source` 保存源码，`main` 发布静态备用
 
 确认接手人实际能查看所需项目和记录，再移除不再需要的旧成员权限。账号名册、密码、验证码、恢复码、私钥、API 凭据或本地登录缓存不要存到公开仓库。正式站 HTML 所含的 Google 站点验证标签是公开校验标记，不用于账号登录；保留线上已使用的标记。核对站长平台的提交与收录状态时，以平台实际记录为准。
 
-## 每次发布的完成条件
+## 日常更新与验收
 
-正式站和备用站使用同一份已验收的源码，每次发布都按以下顺序完成：
+自动发布启用后，把通过本地校验的网站修改合并或推送到 `website-source`。该分支上的提交会触发 [发布工作流](https://github.com/chenhao5072/chenhao5072.github.io/actions/workflows/release-website.yml)。评审中的修改请留在其他分支。
 
-1. 在 `website-source` 上提交本次源码，并从这次提交构建、发布和验证 Cloudflare 正式站。
-2. 正式站验证通过后，把对应源码提交推送到原仓库的 `website-source`。用同一提交生成备用站产物，同步到 `main`。
-3. 确认 GitHub Pages 部署成功，实测备用站的更新内容；在发布记录中关联源码提交、备用站提交及两个站点的部署链接。若有步骤没通过，注明具体待补项，待全部核验后再标为发布完成。
+1. 工作流从同一个提交构建并校验两套网页。Cloudflare 正式站先发布，并校验线上文件。
+2. 正式站验证通过后，工作流发布 GitHub Pages 备用站。确认备用站上的内容正确后，把静态快照同步到 `main`。
+3. 查看运行摘要，并对照 [正式站版本](https://onepiecestudio.pages.dev/release.json)和[备用站版本](https://chenhao5072.github.io/release.json)中的 `sourceCommit`。两处应与这次工作流使用的源码提交一致；首次自动发布成功前，这两个地址可能返回 404。若发布失败，查看失败步骤，修复后重新运行；常规回滚请在 `website-source` 撤销出问题的提交，让两站重新从同一个版本发布。
 
-## 发布 Cloudflare 正式站
+## 首次启用自动发布
+
+需要原仓库管理员和 Cloudflare Pages 项目的部署权限。初始工作流只构建和校验，不发布。
+
+1. 在 [GitHub Pages 设置](https://github.com/chenhao5072/chenhao5072.github.io/settings/pages)将发布源选为 **GitHub Actions**。在 [Environments](https://github.com/chenhao5072/chenhao5072.github.io/settings/environments) 检查 `github-pages` 环境允许 `website-source` 部署。旧的 `main` 分支快照保留；启用后，仅推送 `main` 不再更新备用站。
+2. 在同一仓库创建 `cloudflare-production` 环境，仅允许 `website-source`。在 Cloudflare 创建限定到官网所在账号、权限为 **Account → Cloudflare Pages → Edit** 的 [API 令牌](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/#get-credentials-from-cloudflare)，在该 GitHub 环境的 Secrets 中保存 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`。不要把令牌放进源码或发送给他人。
+3. 前两项备齐后，在 [仓库 Actions 变量](https://github.com/chenhao5072/chenhao5072.github.io/settings/variables/actions)设置 `ONEPIECE_AUTO_RELEASE` 为 `enabled`。管理员在 `website-source` 创建新的提交触发首发，确认两个线上版本标记一致后，才算启用成功。紧急暂停自动发布时移除该变量或更改其值；对已经运行的任务，在 Actions 单独检查或取消。
+
+## 手动发布 Cloudflare 正式站（备用流程）
+
+手动上传 Cloudflare 只会发布网页文件，无法反推源码，也不会同步 GitHub。需要紧急手动发布时，记录所用源码提交，事后用自动发布流程对齐两边。
 
 在源码目录切换到要发布的版本，运行：
 
@@ -40,7 +50,9 @@ Windows 可用 PowerShell 7 从源码目录运行 `pwsh -File scripts/package-re
 
 正式站出现发布回归时，在 **Deployments** 找到上一个已验证的生产部署，选择 [Rollback to this deployment](https://developers.cloudflare.com/pages/configuration/rollbacks/)。回滚后复查正式站，再在 `website-source` 修复原因。
 
-## 同步 GitHub Pages 备用站
+## 手动同步 GitHub Pages 备用站（备用流程）
+
+自动发布启用后，日常更新无需手动复制文件。若 GitHub Pages 发布源仍为 GitHub Actions，下列命令只能更新 `main` 的静态快照，不能触发备用站上线；优先修复并重新运行发布工作流。
 
 用一个单独的目录保存 `main`，不要在源码目录里切分支覆盖文件。首次在源码目录执行：
 
@@ -68,6 +80,6 @@ git -C ../onepiece-pages commit -m "chore: sync GitHub Pages backup"
 git -C ../onepiece-pages push origin main
 ```
 
-到 [GitHub Actions](https://github.com/chenhao5072/chenhao5072.github.io/actions) 确认 Pages 部署成功，再访问 [备用站](https://chenhao5072.github.io/) 与 [备用项目页](https://chenhao5072.github.io/projects/) 确认新版已生效。备用站可以直接访问，页面用 `noindex` 告知搜索引擎不要收录，规范网址和站点地图指向正式域名。备用页不包含正式站的 Google 验证标签；GitHub Pages 不执行 Cloudflare 的响应头和重定向规则。
+如果 Pages 的发布源是 **Deploy from a branch**，到 [GitHub Actions](https://github.com/chenhao5072/chenhao5072.github.io/actions) 确认 Pages 部署成功，再访问 [备用站](https://chenhao5072.github.io/) 与 [备用项目页](https://chenhao5072.github.io/projects/) 确认新版已生效。备用站可以直接访问，页面用 `noindex` 告知搜索引擎不要收录，规范网址和站点地图指向正式域名。备用页不包含正式站的 Google 验证标签；GitHub Pages 不执行 Cloudflare 的响应头和重定向规则。
 
-若备用站需要回滚，在 `main` 用 `git revert` 撤销明确的问题提交，检查变更后正常推送；等 Pages 重新部署并做同样的访问检查。该操作不影响 Cloudflare 正式站。
+只有采用分支发布且需要独立回滚备用站时，才在 `main` 用 `git revert` 撤销明确的问题提交，推送后检查 Pages 是否重新部署。启用 Actions 发布后，请通过 `website-source` 的发布流程协调回滚两个站点。

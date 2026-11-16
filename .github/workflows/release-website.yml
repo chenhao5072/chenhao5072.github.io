@@ -1,0 +1,186 @@
+name: Publish ONEPIECE STUDIO website
+
+on:
+  push:
+    branches: [website-source]
+
+permissions:
+  contents: read
+
+# A newer release must not overtake one that is already deploying.
+concurrency:
+  group: onepiece-website-release
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://onepiecestudio.pages.dev
+  BACKUP_URL: https://chenhao5072.github.io
+
+jobs:
+  build:
+    name: Build and validate both sites
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build from one source commit
+        run: |
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          mkdir -p release
+          npm run build
+          npm run validate
+          node scripts/check-site-release.mjs stamp dist "$GITHUB_SHA"
+          mv dist release/cloudflare
+          npm run build:github
+          npm run validate:github
+          node scripts/check-site-release.mjs stamp dist "$GITHUB_SHA"
+          mv dist release/github
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: website-release
+          path: release/
+          include-hidden-files: true
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+      - name: Explain activation status
+        if: vars.ONEPIECE_AUTO_RELEASE != 'enabled'
+        run: echo 'Both builds validated. Publishing is disabled until ONEPIECE_AUTO_RELEASE is enabled.' >> "$GITHUB_STEP_SUMMARY"
+
+  cloudflare:
+    name: Publish and verify Cloudflare production
+    if: github.repository == 'chenhao5072/chenhao5072.github.io' && vars.ONEPIECE_AUTO_RELEASE == 'enabled'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment:
+      name: cloudflare-production
+      url: ${{ env.SITE_URL }}
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Check release branch and backup deployment mode
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$(git ls-remote origin refs/heads/website-source | cut -f1)" != "$GITHUB_SHA" ]]; then
+            echo 'This run is no longer the latest source commit. Use the newer run, or revert on website-source.' >&2
+            exit 1
+          fi
+          if [[ "$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .build_type)" != workflow ]]; then
+            echo 'Set repository Settings > Pages > Source to GitHub Actions before enabling production releases.' >&2
+            exit 1
+          fi
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: website-release
+          path: release
+      - name: Upload to the existing production project
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          if [[ ! "$CLOUDFLARE_ACCOUNT_ID" =~ ^[[:xdigit:]]{32}$ || -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo 'Configure CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in cloudflare-production.' >&2
+            exit 1
+          fi
+          branch=$(node --input-type=module <<'JS'
+          const url = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/onepiecestudio`;
+          const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` },
+            signal: AbortSignal.timeout(15000)
+          });
+          if (!response.ok) throw new Error(`Could not read the Pages project (HTTP ${response.status}). Check the account and token permissions.`);
+          const { success, result } = await response.json();
+          const branch = result?.production_branch;
+          if (!success || result?.subdomain !== new URL(process.env.SITE_URL).hostname || !branch || /\r|\n/.test(branch)) {
+            throw new Error('Cloudflare project or production branch did not match the expected site.');
+          }
+          console.log(branch);
+          JS
+          )
+          current=$(curl -fsS --max-time 10 "$SITE_URL/release.json?check=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" | jq -r '.sourceCommit // empty' || true)
+          if [[ "$current" != "$GITHUB_SHA" ]]; then
+            npm exec --yes --package=wrangler@4.162.0 -- wrangler pages deploy release/cloudflare \
+              --project-name=onepiecestudio --branch="$branch" --commit-hash="$GITHUB_SHA" --commit-dirty=false
+          else
+            echo 'Cloudflare already reports this commit; verifying it instead of uploading again.'
+          fi
+      - name: Verify served production files
+        run: node scripts/check-site-release.mjs verify "$SITE_URL" release/cloudflare "$GITHUB_SHA"
+
+  github-pages:
+    name: Publish GitHub backup and sync main
+    needs: cloudflare
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: website-release
+          path: release
+      - name: Recheck production and stage backup files
+        run: |
+          node scripts/check-site-release.mjs verify "$SITE_URL" release/cloudflare "$GITHUB_SHA"
+          mv release/github dist
+          node scripts/validate.mjs --github-pages
+          cp -a dist "$RUNNER_TEMP/public-backup"
+          rm -- "$RUNNER_TEMP/public-backup/_headers" "$RUNNER_TEMP/public-backup/_redirects"
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          name: github-pages-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/public-backup
+          retention-days: 7
+      - name: Deploy the backup website
+        id: pages
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
+      - name: Verify served backup files
+        run: node scripts/check-site-release.mjs verify "$BACKUP_URL" dist "$GITHUB_SHA"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          path: backup-repository
+      - name: Record the verified backup in main
+        run: |
+          node scripts/sync-github-pages.mjs backup-repository
+          git -C backup-repository add --all
+          git -C backup-repository diff --cached --check
+          if ! git -C backup-repository diff --cached --quiet; then
+            git -C backup-repository -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'chore: sync verified website backup' -m "Source-Commit: $GITHUB_SHA"
+            git -C backup-repository push origin HEAD:refs/heads/main
+          fi
+          printf 'Both sites verified for source commit `%s`; backup snapshot `%s`.\n' \
+            "$GITHUB_SHA" "$(git -C backup-repository rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
