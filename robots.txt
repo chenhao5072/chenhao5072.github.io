@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://chenhao5072.github.io/sitemap.xml
+Sitemap: https://onepiecestudio.pages.dev/sitemap.xml

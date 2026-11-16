@@ -1,7 +1,0 @@
-/homepage.html / 301!
-/zh / 301!
-/zh/ / 301!
-/zh/:splat /:splat 301!
-/ja/* /ja/404.html 404
-/en/* /en/404.html 404
-/* /404.html 404
