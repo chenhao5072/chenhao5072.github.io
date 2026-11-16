@@ -1,0 +1,9 @@
+/dist/
+/release/
+/qa/
+/.wrangler/
+/node_modules/
+.env
+.env.*
+*.pem
+*.key

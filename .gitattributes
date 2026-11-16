@@ -1,0 +1,2 @@
+* text=auto eol=lf
+src/assets/*.svg -text whitespace=cr-at-eol

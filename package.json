@@ -1,0 +1,14 @@
+{
+  "name": "onepiece-studio-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:github": "node scripts/build.mjs --github-pages",
+    "validate": "node scripts/validate.mjs",
+    "validate:github": "node scripts/validate.mjs --github-pages",
+    "serve": "node scripts/serve.mjs"
+  }
+}

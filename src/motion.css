@@ -1,0 +1,422 @@
+:root {
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 220ms;
+  --motion-enter: 620ms;
+}
+
+.motion-progress {
+  position: fixed;
+  z-index: 220;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--apricot);
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.site-header.motion-header {
+  transition: background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+.site-header.motion-header.is-scrolled {
+  background: rgba(246, 247, 244, 0.97);
+  border-bottom-color: rgba(32, 37, 38, 0.22);
+  box-shadow: 0 8px 24px rgba(32, 37, 38, 0.055);
+}
+
+.motion-preflight .home-hero-copy > *,
+.motion-preflight .projects-hero-copy > *,
+.motion-preflight .page-hero-copy > * {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.motion-preflight .home-hero-copy h1,
+.motion-preflight .projects-hero-copy h1,
+.motion-preflight .page-hero-copy h1 {
+  clip-path: inset(0 0 100% 0);
+}
+
+.motion-preflight .hero-mark-wrap,
+.motion-preflight .projects-hero-index,
+.motion-preflight .page-hero-number,
+.motion-preflight .page-hero-mark,
+.motion-preflight .studio-hero-index,
+.motion-preflight .studio-hero-mark {
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+}
+
+.motion-ready .motion-hero-copy > * {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.motion-ready .motion-hero-copy h1 { clip-path: inset(0 0 100% 0); }
+
+.motion-ready .motion-hero-copy.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--motion-enter) var(--motion-ease), transform var(--motion-enter) var(--motion-ease), clip-path 760ms var(--motion-ease);
+  transition-delay: calc(90ms + var(--motion-order, 0) * 72ms);
+}
+
+.motion-ready .motion-hero-copy.is-visible h1 { clip-path: inset(0 0 0 0); }
+
+.motion-ready .motion-hero-copy .eyebrow::before {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.motion-ready .motion-hero-copy.is-visible .eyebrow::before {
+  transform: scaleX(1);
+  transition: transform 460ms var(--motion-ease) 40ms;
+}
+
+.motion-ready .motion-hero-mark {
+  opacity: 0;
+  transform: translateY(14px) scale(0.96) rotate(-1.5deg);
+}
+
+.motion-ready .motion-hero-mark.is-visible {
+  opacity: var(--motion-end-opacity, 1);
+  transform: translateY(0) scale(1) rotate(0);
+  transition: opacity 720ms var(--motion-ease), transform 920ms var(--motion-ease);
+  transition-delay: 220ms;
+}
+
+.motion-ready .motion-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.motion-ready .motion-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--motion-enter) var(--motion-ease), transform var(--motion-enter) var(--motion-ease);
+  transition-delay: calc(var(--motion-order, 0) * 68ms);
+}
+
+.motion-ready .motion-reveal .section-label::before,
+.motion-ready .motion-reveal.projects-section-heading .projects-section-label > span {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.motion-ready .motion-reveal.is-visible .section-label::before,
+.motion-ready .motion-reveal.is-visible.projects-section-heading .projects-section-label > span {
+  transform: scaleX(1);
+  transition: transform 480ms var(--motion-ease) 80ms;
+}
+
+.motion-ready .motion-fact {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.motion-ready .motion-fact.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 520ms var(--motion-ease), transform 520ms var(--motion-ease);
+  transition-delay: calc(var(--motion-order, 0) * 75ms);
+}
+
+.motion-ready .motion-sequence { position: relative; }
+
+.motion-ready .motion-sequence::after {
+  position: absolute;
+  z-index: 2;
+  top: -1px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--apricot);
+  content: "";
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.motion-ready .motion-sequence.is-visible::after {
+  transform: scaleX(1);
+  transition: transform 760ms var(--motion-ease);
+}
+
+.motion-ready .motion-panel {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+
+.motion-ready .motion-panel.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 560ms var(--motion-ease), transform 720ms var(--motion-ease);
+}
+
+.motion-ready .motion-panel > strong,
+.motion-ready .motion-panel > span,
+.motion-ready .motion-panel .location-meta {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.motion-ready .motion-panel.is-visible > strong,
+.motion-ready .motion-panel.is-visible > span,
+.motion-ready .motion-panel.is-visible .location-meta {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 520ms var(--motion-ease), transform 620ms var(--motion-ease);
+  transition-delay: 240ms;
+}
+
+.motion-ready .motion-decor {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+}
+
+.motion-ready .motion-decor.is-visible {
+  opacity: var(--motion-end-opacity, 0.1);
+  transform: translateY(0) scale(1);
+  transition: opacity 760ms ease, transform 980ms var(--motion-ease);
+}
+
+.motion-ready .motion-media-item .project-evidence-image,
+.motion-ready .motion-media-item .culture-proof-media {
+  clip-path: inset(0 100% 0 0);
+}
+
+.motion-ready .motion-media-item.is-visible .project-evidence-image,
+.motion-ready .motion-media-item.is-visible .culture-proof-media {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 720ms var(--motion-ease);
+  transition-delay: calc(var(--motion-order, 0) * 75ms);
+}
+
+.motion-media-item .project-evidence-image img,
+.motion-media-item .culture-proof-media img {
+  transform: scale(1.035);
+  transition: transform 900ms var(--motion-ease);
+}
+
+.motion-media-item.is-visible .project-evidence-image img,
+.motion-media-item.is-visible .culture-proof-media img { transform: scale(1); }
+
+.motion-ready .projects-data.motion-reveal.is-visible .projects-platform {
+  animation: motion-platform-in 420ms var(--motion-ease) both;
+}
+
+.motion-ready .projects-data.motion-reveal.is-visible .projects-platform:nth-child(2) { animation-delay: 90ms; }
+
+.motion-ready .projects-platform i {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.motion-ready .projects-data.motion-reveal.is-visible .projects-platform i {
+  transform: scaleX(1);
+  transition: transform 360ms var(--motion-ease) 160ms;
+}
+
+@keyframes motion-platform-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.motion-ready .motion-gallery-item {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0.7;
+}
+
+.motion-ready .motion-gallery.is-visible .motion-gallery-item {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  transition: clip-path 760ms var(--motion-ease), opacity 520ms ease;
+  transition-delay: calc(var(--motion-order, 0) * 85ms);
+}
+
+.motion-gallery-item img {
+  transform: scale(1.025);
+  transition: transform 820ms var(--motion-ease);
+}
+
+.motion-gallery.is-visible .motion-gallery-item img { transform: scale(1); }
+
+.motion-gallery.is-settled .motion-gallery-item {
+  clip-path: none;
+  transition: none;
+}
+
+.motion-gallery.is-settled .motion-gallery-item img {
+  transform: none;
+  transition: transform 260ms var(--motion-ease);
+}
+
+.motion-ready .status-stage.motion-reveal .status-copy,
+.motion-ready .status-stage.motion-reveal .status-visual { clip-path: inset(0 50% 0 50%); }
+
+.motion-ready .status-stage.motion-reveal.is-visible .status-copy,
+.motion-ready .status-stage.motion-reveal.is-visible .status-visual {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 720ms var(--motion-ease);
+}
+
+.motion-ready .status-stage.motion-reveal.is-visible .status-visual { transition-delay: 70ms; }
+
+.projects-index-list a { transition: color var(--motion-fast) ease; }
+.projects-index-list a:hover .projects-index-arrow { transform: translateX(3px); }
+.projects-index-arrow { transition: transform var(--motion-fast) var(--motion-ease); }
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-gallery-item:hover img,
+  .motion-gallery.is-settled .motion-gallery-item:hover img { transform: scale(1.02); }
+
+  .motion-media-item:hover .project-evidence-image img,
+  .motion-media-item:hover .culture-proof-media img { transform: scale(1.02); transition-duration: 260ms; }
+}
+
+@media (min-width: 981px) and (max-width: 1180px) {
+  .projects-platforms { grid-template-columns: 1fr; }
+  .projects-platform strong { white-space: nowrap; overflow-wrap: normal; }
+}
+
+@media (max-width: 640px) {
+  :root { --motion-enter: 420ms; }
+
+  .motion-ready .motion-hero-copy > *,
+  .motion-ready .motion-reveal { transform: translateY(12px); }
+
+  .motion-ready .motion-hero-mark { transform: translateY(8px) scale(0.98); }
+
+  .motion-ready .motion-panel {
+    clip-path: none;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .motion-ready .motion-panel.is-visible {
+    clip-path: none;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--motion-enter) var(--motion-ease), transform var(--motion-enter) var(--motion-ease);
+  }
+
+  .motion-ready .motion-gallery-item,
+  .motion-ready .motion-media-item .project-evidence-image,
+  .motion-ready .motion-media-item .culture-proof-media {
+    clip-path: none;
+  }
+
+  .motion-ready .motion-gallery-item {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .motion-ready .motion-gallery.is-visible .motion-gallery-item {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--motion-enter) var(--motion-ease), transform var(--motion-enter) var(--motion-ease);
+    transition-delay: calc(var(--motion-order, 0) * 55ms);
+  }
+
+  .motion-gallery-item img,
+  .motion-gallery.is-visible .motion-gallery-item img,
+  .motion-media-item .project-evidence-image img,
+  .motion-media-item .culture-proof-media img { transform: none; }
+
+  .motion-ready .motion-sequence::after { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-progress { display: none !important; }
+
+  .motion-ready .motion-hero-copy > *,
+  .motion-ready .motion-hero-copy h1,
+  .motion-ready .motion-hero-mark,
+  .motion-ready .motion-reveal,
+  .motion-ready .motion-fact,
+  .motion-ready .motion-gallery-item,
+  .motion-ready .motion-panel,
+  .motion-ready .motion-panel > strong,
+  .motion-ready .motion-panel > span,
+  .motion-ready .motion-panel .location-meta,
+  .motion-ready .motion-decor,
+  .motion-ready .motion-media-item .project-evidence-image,
+  .motion-ready .motion-media-item .culture-proof-media,
+  .motion-ready .status-stage.motion-reveal .status-copy,
+  .motion-ready .status-stage.motion-reveal .status-visual {
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .motion-ready .motion-sequence::after { display: none !important; }
+
+  .motion-gallery-item img,
+  .motion-media-item img,
+  .projects-platform i {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .projects-platform { animation: none !important; }
+}
+
+@media print {
+  .motion-progress { display: none !important; }
+
+  .motion-preflight .home-hero-copy > *,
+  .motion-preflight .projects-hero-copy > *,
+  .motion-preflight .page-hero-copy > *,
+  .motion-preflight .hero-mark-wrap,
+  .motion-preflight .projects-hero-index,
+  .motion-preflight .page-hero-number,
+  .motion-preflight .page-hero-mark,
+  .motion-preflight .studio-hero-index,
+  .motion-preflight .studio-hero-mark,
+  .motion-ready .motion-hero-copy > *,
+  .motion-ready .motion-hero-copy h1,
+  .motion-ready .motion-hero-mark,
+  .motion-ready .motion-reveal,
+  .motion-ready .motion-fact,
+  .motion-ready .motion-gallery-item,
+  .motion-ready .motion-panel,
+  .motion-ready .motion-panel > strong,
+  .motion-ready .motion-panel > span,
+  .motion-ready .motion-panel .location-meta,
+  .motion-ready .motion-decor,
+  .motion-ready .motion-media-item .project-evidence-image,
+  .motion-ready .motion-media-item .culture-proof-media,
+  .motion-ready .status-stage.motion-reveal .status-copy,
+  .motion-ready .status-stage.motion-reveal .status-visual {
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .motion-ready .motion-sequence::after { display: none !important; }
+
+  .motion-gallery-item img,
+  .motion-media-item img,
+  .projects-platform,
+  .projects-platform i {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .motion-ready .motion-decor { opacity: var(--motion-end-opacity, 0.1) !important; }
+  .motion-preflight .page-hero-mark,
+  .motion-ready .page-hero-mark.motion-hero-mark { opacity: 0.08 !important; }
+  .motion-preflight .page-hero-blue .page-hero-mark,
+  .motion-ready .page-hero-blue .page-hero-mark.motion-hero-mark { opacity: 0.10 !important; }
+  .motion-preflight .studio-hero-mark,
+  .motion-ready .studio-hero-mark.motion-hero-mark { opacity: 0.055 !important; }
+}

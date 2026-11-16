@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 320 320" role="img" aria-labelledby="title desc" shape-rendering="geometricPrecision">
+  <title id="title">ONEPIECE STUDIO V2 brand mark</title>
+  <desc id="desc">Integrated orbit O and P monogram.</desc>
+  <g transform="translate(19 6)">
+    <path d="M218 54A126 126 0 1 0 256 205" fill="none" stroke="#465E73" stroke-width="30" stroke-linecap="round"/>
+    <path d="M248.93 88.78A126 126 0 0 1 266.75 160.27" fill="none" stroke="#C77A4D" stroke-width="30" stroke-linecap="round"/>
+    <path d="M118 220V100H168C204 100 226 119 226 149C226 179 204 198 168 198H137" fill="none" stroke="#202526" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
